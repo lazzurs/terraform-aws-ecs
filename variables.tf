@@ -26,7 +26,7 @@ variable "attach_efs" {
 variable "efs_sg_id" {
   description = "The EFS Security Group ID - Required if attach_efs is true"
   type        = list(string)
-  default     = ""
+  default     = [""]
 }
 
 variable "efs_id" {
