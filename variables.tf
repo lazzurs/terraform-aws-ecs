@@ -23,8 +23,8 @@ variable "attach_efs" {
   default     = false
 }
 
-variable "efs_sg_id" {
-  description = "The EFS Security Group ID - Required if attach_efs is true"
+variable "efs_sg_ids" {
+  description = "The EFS Security Group ID(s)"
   type        = list(string)
   default     = [""]
 }

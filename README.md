@@ -1,10 +1,24 @@
 # AWS ECS Terraform Module
-Terraform module that deploys an ECS autoscaling group.  If you include an EFS ID and EFS Security Group, it will also mount the EFS volume to the ECS instances.  
+Terraform module that deploys an ECS autoscaling group.  If you include an EFS ID and EFS Security Group, it will also 
+mount the EFS volume to the ECS instances.  
 
 # Deploying with EFS
-By default, the module will deploy without trying to mount an EFS volume.  If you attempt to deploy the EFS at the same time as the ECS cluster, a race condition exists where the autoscaling group gets created before the mount targets have finished being created.   To avoid this, you can set the depends_on_efs variable to the aws_efs_mount_target output.  This way, the autoscaling group won't get created until the EFS mount targets have been created.
+By default, the module will deploy without trying to mount an EFS volume.
+
+There are two modes of using EFS with this module, either using EFS as a mounted file system on the hosts or as volumes
+for the containers.
+
+If using EFS as volumes in the containers you will need to provide the security groups used for the EFS volumes.
+
+If using EFS as a mounted filesystem and you attempt to deploy the EFS at the same time as the ECS cluster, a race 
+condition exists where the autoscaling group gets created before the mount targets have finished being created.   To 
+avoid this, you can set the depends_on_efs variable to the aws_efs_mount_target output.  This way, the autoscaling 
+group won't get created until the EFS mount targets have been created.
 
 ## Usage
+
+This example is showing using EFS as a mounted filesystem on the hosts.
+
 ```hcl
 module "ecs-0" {
   source                        = "AustinCloudGuru/ecs/aws"
@@ -50,7 +64,7 @@ ecs_additional_iam_statements = [
 | vpc_id | The VPC ID that the cluster will be deployed to| string | | yes |
 | subnet_ids | The Subnet IDs that the cluster will be deployed to | list(string) | | yes |
 | attach_efs | Whether to try and attach an EFS volume to the instances | bool | false | no
-| efs_sg_id | The EFS Security Group ID  - Required if attach_efs is true | string | "" | no |
+| efs_sg_ids | The EFS Security Group ID  - Required if attach_efs is true | list(string) | [""] | no |
 | efs_id | The EFS ID  - Required if attach_efs is true | String | "" | no |
 | depends_on_efs | If attaching EFS, it makes sure that the mount targets are ready | list(string) | [] | no |
 | ecs_name | Name for the ECS cluster that will be deployed | string | | yes | 
@@ -72,7 +86,8 @@ ecs_additional_iam_statements = [
 | cluster_arn | The ECS cluster ARN |
 
 ## Authors
-Module is maintained by [Mark Honomichl](https://github.com/austincloudguru).
+Module has been forked from a module by [Mark Honomichl](https://github.com/austincloudguru).
+Maintained by Rob Lazzurs.
 
 ## License
 MIT Licensed.  See LICENSE for full details
