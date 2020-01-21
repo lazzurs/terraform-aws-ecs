@@ -205,6 +205,7 @@ data "aws_iam_policy_document" "policy" {
       "ecs:RegisterContainerInstance",
       "ecs:StartTelemetrySession",
       "ecs:ListContainerInstances",
+      "ecs:DescribeContainerInstances",
       "ecs:Submit*",
       "ecs:StartTask",
       "ecs:ListClusters",
