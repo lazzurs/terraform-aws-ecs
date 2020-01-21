@@ -12,3 +12,7 @@ output "cluster_arn" {
 output "cluster_asg_name" {
   value = aws_autoscaling_group.this.name
 }
+
+output "cluster_asg_arn" {
+  value = aws_autoscaling_group.this.arn
+}
