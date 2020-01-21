@@ -8,3 +8,7 @@ output "cluster_id" {
 output "cluster_arn" {
   value = aws_ecs_cluster.this.arn
 }
+
+output "cluster_asg_name" {
+  value = aws_autoscaling_group.this.name
+}

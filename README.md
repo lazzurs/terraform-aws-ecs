@@ -84,6 +84,7 @@ ecs_additional_iam_statements = [
 |------|-------------|
 | cluster_id | The ECS cluster ID |
 | cluster_arn | The ECS cluster ARN |
+| cluster_asg_name | The ECS cluster Auto Scaling Group name, used to attach Auto Scaling Policies |
 
 ## Authors
 Module has been forked from a module by [Mark Honomichl](https://github.com/austincloudguru).
