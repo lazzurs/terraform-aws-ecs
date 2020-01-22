@@ -32,7 +32,7 @@ echo "ECS_CLUSTER=$${ecs_cluster_name}" >> /etc/ecs/ecs.config
 EOF
 
   vars = {
-    ecs_cluster_name = aws_ecs_cluster.this.name
+    ecs_cluster_name = var.ecs_name
   }
 }
 
@@ -69,7 +69,7 @@ echo "ECS_CLUSTER=$${ecs_cluster_name}" >> /etc/ecs/ecs.config
 EOF
 
   vars = {
-    ecs_cluster_name = aws_ecs_cluster.this.name
+    ecs_cluster_name = var.ecs_name
     efs_id           = var.efs_id
   }
 }
