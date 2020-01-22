@@ -97,8 +97,8 @@ variable "ecs_additional_iam_statements" {
   default = []
 }
 
-variable "ecs_capacity_provider" {
-  description = "Name of the capacity provider to use"
-  type        = string
-  default     = ""
+variable "ecs_capacity_provider_target" {
+  description = "Percentage target of capacity to get to before triggering scaling"
+  type        = number
+  default     = 90
 }

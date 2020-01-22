@@ -120,7 +120,7 @@ resource "aws_security_group" "this" {
 
 resource "aws_ecs_cluster" "this" {
   name               = var.ecs_name
-  capacity_providers = var.ecs_capacity_provider
+  capacity_providers = aws_ecs_capacity_provider.this.name
   tags = merge(
     {
       "Name" = var.ecs_name
@@ -152,6 +152,21 @@ resource "aws_autoscaling_group" "this" {
     ],
     local.tags_asg_format,
   )
+}
+
+resource "aws_ecs_capacity_provider" "this" {
+  name = "${var.ecs_name}-capacity"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.this.arn
+    managed_termination_protection = "DISABLED"
+
+    managed_scaling {
+      status          = "ENABLED"
+      target_capacity = var.ecs_capacity_provider_target
+    }
+  }
+
 }
 
 resource "aws_launch_configuration" "this" {

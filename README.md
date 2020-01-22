@@ -76,7 +76,7 @@ ecs_additional_iam_statements = [
 | ecs_key_name | The key name to use for the instances. | string | "" | no |
 | ecs_associate_public_ip_address | Whether to associate a public IP in the launch configuration | bool | false | no | 
 | ecs_additional_iam_statements | Additional IAM statements for the ECS instances | list(object) | [] | no |
-| ecs_capacity_provider | Name of the ECS capacity provider to use | string | "" | no |
+| ecs_capacity_provider_target | Target percentage ECS capacity provider to use | number | "" | no |
 | tags | A map of tags to add to all resources | map(string) | {} | no |
 
 ## Outputs
