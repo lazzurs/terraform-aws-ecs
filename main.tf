@@ -120,7 +120,7 @@ resource "aws_security_group" "this" {
 
 resource "aws_ecs_cluster" "this" {
   name               = var.ecs_name
-  capacity_providers = aws_ecs_capacity_provider.this.name
+  capacity_providers = [aws_ecs_capacity_provider.this.name]
   tags = merge(
     {
       "Name" = var.ecs_name
