@@ -127,6 +127,7 @@ resource "aws_ecs_cluster" "this" {
     },
     var.tags
   )
+  depends_on = [aws_ecs_capacity_provider.this]
 }
 
 resource "aws_autoscaling_group" "this" {
@@ -166,7 +167,7 @@ resource "aws_ecs_capacity_provider" "this" {
       target_capacity = var.ecs_capacity_provider_target
     }
   }
-
+  depends_on = [aws_autoscaling_group.this]
 }
 
 resource "aws_launch_configuration" "this" {
