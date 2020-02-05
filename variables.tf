@@ -102,3 +102,15 @@ variable "ecs_capacity_provider_target" {
   type        = number
   default     = 90
 }
+
+variable "http_proxy" {
+  description = "Name of the HTTP proxy on the network"
+  type        = string
+  default     = ""
+}
+
+variable "http_proxy_port" {
+  description = "Port number of the HTTP proxy"
+  type        = number
+  default     = 3128
+}

@@ -2,6 +2,10 @@
 Terraform module that deploys an ECS autoscaling group.  If you include an EFS ID and EFS Security Group, it will also 
 mount the EFS volume to the ECS instances.  
 
+# HTTP Proxy support
+In some environments an HTTP proxy will be required to get containers and talk to the outside world. This module 
+supports this via the http_proxy and http_proxy_port variables.
+
 # Deploying with EFS
 By default, the module will deploy without trying to mount an EFS volume.
 
@@ -21,7 +25,7 @@ This example is showing using EFS as a mounted filesystem on the hosts.
 
 ```hcl
 module "ecs-0" {
-  source                        = "AustinCloudGuru/ecs/aws"
+  source                        = "lazzurs/ecs/aws"
   version                       = "1.1.0"
   ecs_name                      = "my-ecs-cluster"
   vpc_id                        = vpc-0e151a59f874eadd8
@@ -68,7 +72,7 @@ ecs_additional_iam_statements = [
 | efs_id | The EFS ID  - Required if attach_efs is true | String | "" | no |
 | depends_on_efs | If attaching EFS, it makes sure that the mount targets are ready | list(string) | [] | no |
 | ecs_name | Name for the ECS cluster that will be deployed | string | | yes | 
-| ecs_cidr_block | Cider Block for the Security Group | list(string) | | yes |
+| ecs_cidr_block | CIDR Block for the Security Group | list(string) | | yes |
 | ecs_min_size | The minimum number of ECS servers to create in the autoscaling group | number | 1 | no |
 | ecs_max_size | The maximuum number of ECS servers to create in the autoscaling group | number | 1 | no |
 | ecs_desired_capacity | The desired number of ECS servers to create in the autoscaling group | number | 1 | no |
@@ -77,6 +81,8 @@ ecs_additional_iam_statements = [
 | ecs_associate_public_ip_address | Whether to associate a public IP in the launch configuration | bool | false | no | 
 | ecs_additional_iam_statements | Additional IAM statements for the ECS instances | list(object) | [] | no |
 | ecs_capacity_provider_target | Target percentage ECS capacity provider to use | number | "" | no |
+| http_proxy | Name of the HTTP proxy that Docker and ECS agent should use | string | "" | no |
+| http_proxy_port | Port number to use for the HTTP proxy | string | 3128 | no |
 | tags | A map of tags to add to all resources | map(string) | {} | no |
 
 ## Outputs
