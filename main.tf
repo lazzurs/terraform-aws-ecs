@@ -15,7 +15,7 @@ data "aws_ami" "latest_ecs_ami" {
 }
 
 data "template_file" "user_data" {
-  template = file("./user_data.tpl")
+  template = file("${path.module}/user_data.tpl")
   vars = {
     ecs_cluster_name = var.ecs_name
     efs_id = var.efs_id
