@@ -45,7 +45,7 @@ if [ $OS == "AL2" ] && [ ! -f /var/lib/cloud/instance/sem/config_docker_http_pro
     cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
 [Service]
 Environment="HTTP_PROXY=http://$PROXY_HOST:$PROXY_PORT/"
-Environment="HTTPS_PROXY=https://$PROXY_HOST:$PROXY_PORT/"
+Environment="HTTPS_PROXY=http://$PROXY_HOST:$PROXY_PORT/"
 Environment="NO_PROXY=169.254.169.254,169.254.170.2"
 EOF
     systemctl daemon-reload
@@ -58,7 +58,7 @@ fi
 # Amazon Linux AMI
 if [ $OS == "ALAMI" ] && [ ! -f /var/lib/cloud/instance/sem/config_docker_http_proxy ]; then
     echo "export HTTP_PROXY=http://$PROXY_HOST:$PROXY_PORT/" >> /etc/sysconfig/docker
-    echo "export HTTPS_PROXY=https://$PROXY_HOST:$PROXY_PORT/" >> /etc/sysconfig/docker
+    echo "export HTTPS_PROXY=http://$PROXY_HOST:$PROXY_PORT/" >> /etc/sysconfig/docker
     echo "export NO_PROXY=169.254.169.254,169.254.170.2" >> /etc/sysconfig/docker
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_docker_http_proxy
 fi
@@ -67,6 +67,7 @@ fi
 if [ ! -f /var/lib/cloud/instance/sem/config_ecs-agent_http_proxy ]; then
     cat <<EOF > /etc/ecs/ecs.config
 HTTP_PROXY=$PROXY_HOST:$PROXY_PORT
+HTTPS_PROXY=$PROXY_HOST:$PROXY_PORT
 NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock
 EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-agent_http_proxy
@@ -79,6 +80,7 @@ if [ $OS == "AL2" ] && [ ! -f /var/lib/cloud/instance/sem/config_ecs-init_http_p
     cat <<EOF > /etc/systemd/system/ecs.service.d/http-proxy.conf
 [Service]
 Environment="HTTP_PROXY=$PROXY_HOST:$PROXY_PORT/"
+Environment="HTTPS_PROXY=$PROXY_HOST:$PROXY_PORT/"
 Environment="NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock"
 EOF
     systemctl daemon-reload
@@ -91,6 +93,7 @@ fi
 if [ $OS == "ALAMI" ] && [ ! -f /var/lib/cloud/instance/sem/config_ecs-init_http_proxy ]; then
     cat <<EOF > /etc/init/ecs.override
 env HTTP_PROXY=$PROXY_HOST:$PROXY_PORT
+env HTTPS_PROXY=$PROXY_HOST:$PROXY_PORT
 env NO_PROXY=169.254.169.254,169.254.170.2,/var/run/docker.sock
 EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-init_http_proxy
