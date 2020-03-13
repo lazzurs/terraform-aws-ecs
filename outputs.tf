@@ -16,3 +16,7 @@ output "cluster_asg_name" {
 output "cluster_asg_arn" {
   value = aws_autoscaling_group.this.arn
 }
+
+output "cluster_iam_role_arn" {
+  value = aws_iam_role.this.arn
+}
