@@ -6,7 +6,7 @@ data "aws_ami" "latest_ecs_ami" {
   owners      = ["591542846629"] # AWS
   filter {
     name   = "name"
-    values = ["*amazon-ecs-optimized"]
+    values = ["amzn2-ami-ecs-hvm-2*-x86_64-ebs"]
   }
   filter {
     name   = "virtualization-type"
