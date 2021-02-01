@@ -21,6 +21,16 @@ data "template_file" "user_data" {
     efs_id           = var.efs_id
     http_proxy       = var.http_proxy
     http_proxy_port  = var.http_proxy_port
+    system_controls  = join("\n", data.template_file.sysctl.*.rendered)
+  }
+}
+
+data "template_file" "sysctl" {
+  count    = length(var.system_controls)
+  template = file("${path.module}/system_controls.tpl")
+  vars = {
+    key   = var.system_controls[count.index].name
+    value = var.system_controls[count.index].value
   }
 }
 
@@ -39,6 +49,13 @@ resource "null_resource" "tags_as_list_of_maps" {
     "key"                 = keys(var.tags)[count.index]
     "value"               = values(var.tags)[count.index]
     "propagate_at_launch" = "true"
+  }
+}
+
+#DBG user_data, might be useful to keep representation in state for reference.
+resource "null_resource" "user_data_rendered_view" {
+  triggers = {
+    user_data = data.template_file.user_data.rendered
   }
 }
 

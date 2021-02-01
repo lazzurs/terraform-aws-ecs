@@ -99,6 +99,13 @@ EOF
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-init_http_proxy
 fi
 %{ endif }
+%{ if system_controls != "" }
+--==BOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
+${system_controls}
+sysctl -p
+%{ endif }
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
 
@@ -107,3 +114,5 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 echo "ECS_CLUSTER=${ecs_cluster_name}" >> /etc/ecs/ecs.config
 
 --==BOUNDARY==--
+
+
