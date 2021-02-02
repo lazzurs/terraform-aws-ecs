@@ -114,3 +114,12 @@ variable "http_proxy_port" {
   type        = number
   default     = 3128
 }
+
+variable "system_controls" {
+  description = "A list of node-level sysctls kernel parameters to set on the container instance"
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
