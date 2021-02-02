@@ -18,9 +18,19 @@ data "template_file" "user_data" {
   template = file("${path.module}/user_data.tpl")
   vars = {
     ecs_cluster_name = var.ecs_name
-    efs_id = var.efs_id
-    http_proxy = var.http_proxy
-    http_proxy_port = var.http_proxy_port
+    efs_id           = var.efs_id
+    http_proxy       = var.http_proxy
+    http_proxy_port  = var.http_proxy_port
+    system_controls  = join("\n", data.template_file.sysctl.*.rendered)
+  }
+}
+
+data "template_file" "sysctl" {
+  count    = length(var.system_controls)
+  template = file("${path.module}/system_controls.tpl")
+  vars = {
+    key   = var.system_controls[count.index].name
+    value = var.system_controls[count.index].value
   }
 }
 
@@ -39,6 +49,13 @@ resource "null_resource" "tags_as_list_of_maps" {
     "key"                 = keys(var.tags)[count.index]
     "value"               = values(var.tags)[count.index]
     "propagate_at_launch" = "true"
+  }
+}
+
+#DBG user_data, might be useful to keep representation in state for reference.
+resource "null_resource" "user_data_rendered_view" {
+  triggers = {
+    user_data = data.template_file.user_data.rendered
   }
 }
 
@@ -79,6 +96,21 @@ resource "aws_ecs_cluster" "this" {
     var.tags
   )
   depends_on = [aws_ecs_capacity_provider.this]
+}
+
+##NB: https://github.com/hashicorp/terraform-provider-aws/issues/4852
+## The Cluster cannot be deleted/renamed while Container Instances are active or draining.
+resource "null_resource" "asg-scale-to-0-on-destroy" {
+  triggers = {
+    cluster_arn            = aws_ecs_cluster.this.arn
+    capacity_providers_arn = join(",", aws_ecs_cluster.this.capacity_providers)
+    asg_name               = aws_autoscaling_group.this.name
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${self.triggers.asg_name} --min-size 0 --max-size 0 --desired-capacity 0"
+  }
+  depends_on = [aws_ecs_cluster.this]
 }
 
 resource "aws_autoscaling_group" "this" {
