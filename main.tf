@@ -18,9 +18,9 @@ data "template_file" "user_data" {
   template = file("${path.module}/user_data.tpl")
   vars = {
     ecs_cluster_name = var.ecs_name
-    efs_id = var.efs_id
-    http_proxy = var.http_proxy
-    http_proxy_port = var.http_proxy_port
+    efs_id           = var.efs_id
+    http_proxy       = var.http_proxy
+    http_proxy_port  = var.http_proxy_port
   }
 }
 
@@ -79,6 +79,21 @@ resource "aws_ecs_cluster" "this" {
     var.tags
   )
   depends_on = [aws_ecs_capacity_provider.this]
+}
+
+##NB: https://github.com/hashicorp/terraform-provider-aws/issues/4852
+## The Cluster cannot be deleted/renamed while Container Instances are active or draining.
+resource "null_resource" "asg-scale-to-0-on-destroy" {
+  triggers = {
+    cluster_arn            = aws_ecs_cluster.this.arn
+    capacity_providers_arn = join(",", aws_ecs_cluster.this.capacity_providers)
+    asg_name               = aws_autoscaling_group.this.name
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${self.triggers.asg_name} --min-size 0 --max-size 0 --desired-capacity 0"
+  }
+  depends_on = [aws_ecs_cluster.this]
 }
 
 resource "aws_autoscaling_group" "this" {
