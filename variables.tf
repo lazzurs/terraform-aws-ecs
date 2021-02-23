@@ -123,3 +123,27 @@ variable "system_controls" {
   }))
   default = []
 }
+
+variable "monitoring" {
+  description = "Enabling detailed monitoring for launch template instances"
+  default     = "true"
+}
+
+variable "metadata_options_endpoint" {
+  description = "Metadata option http endpoint"
+  default     = "enabled"
+}
+variable "metadata_options_tokens" {
+  description = "Metadata option http tokens"
+  default     = "required"
+}
+variable "metadata_options_hop_limit" {
+  description = "Metadata option http hop limit"
+  type        = number
+  default     = 1
+}
+
+variable "additional_instance_role_policy" {
+  description = "Additional policy that can be added to the ECS instances. By default we have SSM access enabled"
+  default     = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
