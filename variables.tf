@@ -142,3 +142,8 @@ variable "metadata_options_hop_limit" {
   type        = number
   default     = 1
 }
+
+variable "additional_instance_role_policy" {
+  description = "Additional policy that can be added to the ECS instances. By default we have SSM access enabled"
+  default     = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
