@@ -153,7 +153,6 @@ resource "aws_ecs_capacity_provider" "this" {
   depends_on = [aws_autoscaling_group.this]
 }
 
-
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.ecs_name}-"
   image_id      = data.aws_ami.latest_ecs_ami.image_id
@@ -162,12 +161,25 @@ resource "aws_launch_template" "this" {
   vpc_security_group_ids = (length(var.efs_sg_ids) > 0 ? concat([
     aws_security_group.this.id], var.efs_sg_ids) : [
   aws_security_group.this.id])
-  iam_instance_profile        = aws_iam_instance_profile.this.name
-  associate_public_ip_address = var.ecs_associate_public_ip_address
-  user_data                   = data.template_file.user_data.rendered
+
+  user_data = data.template_file.user_data.rendered
+
+  network_interfaces {
+    associate_public_ip_address = var.ecs_associate_public_ip_address
+  }
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.this.name
+  }
 
   monitoring {
-    enabled = true
+    enabled = var.monitoring
+  }
+
+  metadata_options {
+    http_endpoint               = var.metadata_options_endpoint
+    http_tokens                 = var.metadata_options_tokens
+    http_put_response_hop_limit = var.metadata_options_hop_limit
   }
 
   tag_specifications {
