@@ -121,7 +121,7 @@ resource "aws_autoscaling_group" "this" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
   vpc_zone_identifier       = var.subnet_ids
-  launch_configuration      = aws_launch_configuration.this.name
+  launch_configuration      = aws_launch_template.this.name
   lifecycle {
     create_before_destroy = true
   }
@@ -153,18 +153,32 @@ resource "aws_ecs_capacity_provider" "this" {
   depends_on = [aws_autoscaling_group.this]
 }
 
-resource "aws_launch_configuration" "this" {
-  name_prefix                 = "${var.ecs_name}-"
-  image_id                    = data.aws_ami.latest_ecs_ami.image_id
-  instance_type               = var.ecs_instance_type
-  security_groups             = (length(var.efs_sg_ids) > 0 ? concat([aws_security_group.this.id], var.efs_sg_ids) : [aws_security_group.this.id])
+
+resource "aws_launch_template" "this" {
+  name_prefix   = "${var.ecs_name}-"
+  image_id      = data.aws_ami.latest_ecs_ami.image_id
+  instance_type = var.ecs_instance_type
+  key_name      = var.ecs_key_name
+  vpc_security_group_ids = (length(var.efs_sg_ids) > 0 ? concat([
+    aws_security_group.this.id], var.efs_sg_ids) : [
+  aws_security_group.this.id])
   iam_instance_profile        = aws_iam_instance_profile.this.name
-  key_name                    = var.ecs_key_name
   associate_public_ip_address = var.ecs_associate_public_ip_address
   user_data                   = data.template_file.user_data.rendered
 
-  lifecycle {
-    create_before_destroy = true
+  monitoring {
+    enabled = true
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = merge(
+      {
+        "Name" = var.ecs_name
+      },
+      var.tags
+    )
   }
 }
 
