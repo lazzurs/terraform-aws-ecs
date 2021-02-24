@@ -26,7 +26,7 @@ output "cluster_iam_role_arn" {
   value       = aws_iam_role.this.arn
 }
 
-output "cluster_aws_launch_configuration_name" {
-  description = "Cluster AutoScaling Group aws_launch_configuration Name"
-  value       = aws_launch_configuration.this.name
+output "cluster_aws_launch_template_name" {
+  description = "Cluster AutoScaling Group aws_template Name"
+  value       = aws_launch_template.this.name
 }
