@@ -182,6 +182,9 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address
+    security_groups = (length(var.efs_sg_ids) > 0 ? concat([
+      aws_security_group.this.id], var.efs_sg_ids) : [
+    aws_security_group.this.id])
   }
 
   iam_instance_profile {
