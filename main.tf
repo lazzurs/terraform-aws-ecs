@@ -162,7 +162,7 @@ resource "aws_launch_template" "this" {
     aws_security_group.this.id], var.efs_sg_ids) : [
   aws_security_group.this.id])
 
-  user_data = data.template_file.user_data.rendered
+  user_data = "${base64encode(data.template_file.user_data.rendered)}"
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address
