@@ -34,6 +34,17 @@ data "template_file" "sysctl" {
   }
 }
 
+data "template_cloudinit_config" "this" {
+  base64_encode = true
+  gzip          = false
+
+  part {
+    filename     = "common.script"
+    content_type = "text/x-shellscript"
+    content      = data.template_file.user_data.rendered
+  }
+}
+
 
 #------------------------------------------------------------------------------
 # Local Values
@@ -121,7 +132,12 @@ resource "aws_autoscaling_group" "this" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
   vpc_zone_identifier       = var.subnet_ids
-  launch_configuration      = aws_launch_template.this.name
+
+  launch_template {
+    id      = "${aws_launch_template.this.id}"
+    version = "$Latest"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -162,7 +178,7 @@ resource "aws_launch_template" "this" {
     aws_security_group.this.id], var.efs_sg_ids) : [
   aws_security_group.this.id])
 
-  user_data = "${base64encode(data.template_file.user_data.rendered)}"
+  user_data = data.template_cloudinit_config.this.rendered
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address
