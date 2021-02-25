@@ -174,9 +174,6 @@ resource "aws_launch_template" "this" {
   image_id      = data.aws_ami.latest_ecs_ami.image_id
   instance_type = var.ecs_instance_type
   key_name      = var.ecs_key_name
-  vpc_security_group_ids = (length(var.efs_sg_ids) > 0 ? concat([
-    aws_security_group.this.id], var.efs_sg_ids) : [
-  aws_security_group.this.id])
 
   user_data = data.template_cloudinit_config.this.rendered
 
