@@ -83,6 +83,11 @@ ecs_additional_iam_statements = [
 | ecs_capacity_provider_target | Target percentage ECS capacity provider to use | number | "" | no |
 | http_proxy | Name of the HTTP proxy that Docker and ECS agent should use | string | "" | no |
 | http_proxy_port | Port number to use for the HTTP proxy | string | 3128 | no |
+| additional_instance_role_policy | Additional policy that can be added to the ECS instances | string | policy/AmazonSSMManagedInstanceCore | no |
+| monitoring | Enabling detailed monitoring in the launch template | string | true | no |
+| metadata_options_endpoint | Metadata option http endpoint | string | enabled | no |
+| metadata_options_tokens | Metadata option http tokens| string | required | no |
+| metadata_options_hop_limit | Metadata option http hop limit | number | 1 | no |
 | tags | A map of tags to add to all resources | map(string) | {} | no |
 
 ## Outputs
@@ -93,7 +98,7 @@ ecs_additional_iam_statements = [
 | cluster_arn | The ECS cluster ARN |
 | cluster_asg_name | The ECS cluster Auto Scaling Group name, used to attach Auto Scaling Policies |
 | cluster_asg_arn | The ECS cluster Auto Scaling Group arn, used for ECS capacity providers |
-| cluster_aws_launch_configuration_name | The ECS cluster AutoScaling Group aws_launch_configuration Name |
+| cluster_aws_launch_template_name | The ECS cluster AutoScaling Group aws_launch_template Name |
 | cluster_iam_role_arn | The ECS cluster IAM role ARN, useful for attaching to ECR repos |
 
 ## Authors
