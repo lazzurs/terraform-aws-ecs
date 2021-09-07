@@ -1,5 +1,16 @@
 Content-Type: multipart/mixed; boundary="==BOUNDARY=="
 MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/cloud-boothook; charset="us-ascii"
+
+# Install ECS agent
+cloud-init-per once disable_docker_repo amazon-linux-extras disable docker
+cloud-init-per once install_ecs_agent amazon-linux-extras install -y ecs
+cloud-init-per once enable_ecs_agent systemctl enable --now ecs
+
+--==BOUNDARY==--
+
 %{ if efs_id != "" }
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"
@@ -25,11 +36,8 @@ PROXY_PORT=${http_proxy_port}
 if grep -q 'Amazon Linux release 2' /etc/system-release ; then
     OS=AL2
     echo "Setting OS to Amazon Linux 2"
-elif grep -q 'Amazon Linux AMI' /etc/system-release ; then
-    OS=ALAMI
-    echo "Setting OS to Amazon Linux AMI"
 else
-    echo "This user data script only supports Amazon Linux 2 and Amazon Linux AMI."
+    echo "This user data script only supports Amazon Linux 2 AMI."
 fi
 
 # Set Yum HTTP proxy
@@ -112,7 +120,14 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 #!/bin/bash
 # Set any ECS agent configuration options
 echo "ECS_CLUSTER=${ecs_cluster_name}" >> /etc/ecs/ecs.config
+echo "ECS_IMAGE_PULL_BEHAVIOR=always" >> /etc/ecs/ecs.config
+echo "ECS_ENABLE_UNTRACKED_IMAGE_CLEANUP=true" >> /etc/ecs/ecs.config
+echo "ECS_ENABLE_SPOT_INSTANCE_DRAINING=true" >> /etc/ecs/ecs.config
+
+systemctl restart ecs
 
 --==BOUNDARY==--
+
+
 
 

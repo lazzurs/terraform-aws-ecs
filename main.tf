@@ -3,10 +3,10 @@
 #------------------------------------------------------------------------------
 data "aws_ami" "latest_ecs_ami" {
   most_recent = true
-  owners      = ["591542846629"] # AWS
+  owners      = ["137112412989"] # AWS
   filter {
     name   = "name"
-    values = ["amzn2-ami-ecs-hvm-2*-x86_64-ebs"]
+    values = ["amzn2-ami-hvm-2.0.*-x86_64-gp2"]
   }
   filter {
     name   = "virtualization-type"
