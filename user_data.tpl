@@ -8,7 +8,6 @@ cloud-init-per once yum_update yum update -y
 cloud-init-per once disable_docker_repo amazon-linux-extras disable docker
 cloud-init-per once install_ecs_agent amazon-linux-extras install -y ecs
 cloud-init-per once enable_ecs_agent systemctl enable --now ecs
---==BOUNDARY==
 %{ if efs_id != "" }
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"
@@ -73,6 +72,7 @@ EOF
         systemctl restart ecs
     fi
     echo "$$: $(date +%s.%N | cut -b1-13)" > /var/lib/cloud/instance/sem/config_ecs-init_http_proxy
+%{ endif }
 %{ if system_controls != "" }
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
