@@ -7,7 +7,6 @@ Content-Type: text/cloud-boothook; charset="us-ascii"
 cloud-init-per once yum_update yum update -y
 cloud-init-per once disable_docker_repo amazon-linux-extras disable docker
 cloud-init-per once install_ecs_agent amazon-linux-extras install -y ecs
-cloud-init-per once enable_ecs_agent systemctl enable --now ecs
 %{ if efs_id != "" }
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"
@@ -88,8 +87,6 @@ echo "ECS_CLUSTER=${ecs_cluster_name}" >> /etc/ecs/ecs.config
 echo "ECS_IMAGE_PULL_BEHAVIOR=always" >> /etc/ecs/ecs.config
 echo "ECS_ENABLE_UNTRACKED_IMAGE_CLEANUP=true" >> /etc/ecs/ecs.config
 echo "ECS_ENABLE_SPOT_INSTANCE_DRAINING=true" >> /etc/ecs/ecs.config
-
-systemctl restart ecs
 --==BOUNDARY==--
 
 
