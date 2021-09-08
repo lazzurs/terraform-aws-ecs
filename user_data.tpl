@@ -1,12 +1,5 @@
 Content-Type: multipart/mixed; boundary="==BOUNDARY=="
 MIME-Version: 1.0
---==BOUNDARY==
-Content-Type: text/cloud-boothook; charset="us-ascii"
-
-# Install ECS agent
-cloud-init-per once yum_update yum update -y
-cloud-init-per once disable_docker_repo amazon-linux-extras disable docker
-cloud-init-per once install_ecs_agent amazon-linux-extras install -y ecs
 %{ if efs_id != "" }
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"
