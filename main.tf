@@ -1,17 +1,9 @@
 #------------------------------------------------------------------------------
 # Collect necessary data
 #------------------------------------------------------------------------------
-data "aws_ami" "latest_ecs_ami" {
-  most_recent = true
-  owners      = ["137112412989"] # AWS
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-2.0.*-x86_64-gp2"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
+
+data "aws_ssm_parameter" "ecs_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
 data "template_file" "user_data" {
@@ -171,7 +163,7 @@ resource "aws_ecs_capacity_provider" "this" {
 
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.ecs_name}-"
-  image_id      = data.aws_ami.latest_ecs_ami.image_id
+  image_id      = data.aws_ssm_parameter.ecs_ami.value
   instance_type = var.ecs_instance_type
   key_name      = var.ecs_key_name
 
