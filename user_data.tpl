@@ -1,5 +1,10 @@
 Content-Type: multipart/mixed; boundary="==BOUNDARY=="
 MIME-Version: 1.0
+--==BOUNDARY==
+Content-Type: text/cloud-boothook; charset="us-ascii"
+
+# Update system
+cloud-init-per once yum_update yum update -y
 %{ if efs_id != "" }
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"
@@ -81,6 +86,7 @@ echo "ECS_IMAGE_PULL_BEHAVIOR=always" >> /etc/ecs/ecs.config
 echo "ECS_ENABLE_UNTRACKED_IMAGE_CLEANUP=true" >> /etc/ecs/ecs.config
 echo "ECS_ENABLE_SPOT_INSTANCE_DRAINING=true" >> /etc/ecs/ecs.config
 systemctl enable --now --no-block ecs.service
+systemctl enable --now --no-block amazon-ecs-volume-plugin.service
 --==BOUNDARY==--
 
 
