@@ -80,6 +80,10 @@ sysctl -p
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
 #!/bin/bash
+echo "DOCKER_GID=$(getent group docker | awk -F : '{ print $3}')" > /etc/profile.d/docker_gid.sh
+--==BOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
 # Set any ECS agent configuration options
 echo "ECS_CLUSTER=${ecs_cluster_name}" >> /etc/ecs/ecs.config
 echo "ECS_IMAGE_PULL_BEHAVIOR=always" >> /etc/ecs/ecs.config
