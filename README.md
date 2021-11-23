@@ -103,7 +103,7 @@ ecs_additional_iam_statements = [
 
 ## Authors
 Module has been forked from a module by [Mark Honomichl](https://github.com/austincloudguru).
-Maintained by Rob Lazzurs.
+Maintained by Callum Scott.
 
 ## License
 MIT Licensed.  See LICENSE for full details
