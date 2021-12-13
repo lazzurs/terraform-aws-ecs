@@ -124,9 +124,10 @@ resource "aws_autoscaling_group" "this" {
   health_check_type         = "EC2"
   health_check_grace_period = 300
   vpc_zone_identifier       = var.subnet_ids
+  protect_from_scale_in     = var.asg_protect_from_scale_in
 
   launch_template {
-    id      = "${aws_launch_template.this.id}"
+    id      = aws_launch_template.this.id
     version = "$Latest"
   }
 
@@ -151,7 +152,7 @@ resource "aws_ecs_capacity_provider" "this" {
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.this.arn
-    managed_termination_protection = "DISABLED"
+    managed_termination_protection = var.asg_provider_managed_termination_protection
 
     managed_scaling {
       status          = "ENABLED"
