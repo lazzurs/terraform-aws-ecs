@@ -41,7 +41,7 @@ variable "ecs_name" {
 }
 
 variable "ecs_cidr_block" {
-  description = "ECS Cluster Name"
+  description = "ECS CIDR block"
   type        = list(string)
 }
 
@@ -146,4 +146,22 @@ variable "metadata_options_hop_limit" {
 variable "additional_instance_role_policy" {
   description = "Additional policy that can be added to the ECS instances. By default we have SSM access enabled"
   default     = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+variable "asg_protect_from_scale_in" {
+  description = <<-EOT
+  Allows setting instance protection. The Auto Scaling Group will not select instances with this setting
+  for termination during scale in events.
+  EOT
+  type        = bool
+  default     = true
+}
+
+variable "asg_provider_managed_termination_protection" {
+  description = <<-EOT
+  Enables or disables container-aware termination of instances in the auto scaling group when scale-in happens.
+  Valid values are ENABLED and DISABLED.
+  EOT
+  type        = string
+  default     = "ENABLED"
 }

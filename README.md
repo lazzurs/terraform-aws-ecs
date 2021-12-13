@@ -61,45 +61,93 @@ ecs_additional_iam_statements = [
 ]
 
 ```
-   
-## Variables
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 1.0.0 |
+| aws | >= 2.45 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | 3.69.0 |
+| null | 3.1.0 |
+| template | 2.2.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_autoscaling_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
+| [aws_ecs_capacity_provider.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_capacity_provider) | resource |
+| [aws_ecs_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
+| [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
+| [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.additional_instance_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_launch_template.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
+| [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [null_resource.asg-scale-to-0-on-destroy](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.tags_as_list_of_maps](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.user_data_rendered_view](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_ssm_parameter.ecs_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+| [template_cloudinit_config.this](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/cloudinit_config) | data source |
+| [template_file.sysctl](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
+| [template_file.user_data](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
+
+## Inputs
+
 | Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| vpc_id | The VPC ID that the cluster will be deployed to| string | | yes |
-| subnet_ids | The Subnet IDs that the cluster will be deployed to | list(string) | | yes |
-| attach_efs | Whether to try and attach an EFS volume to the instances | bool | false | no
-| efs_sg_ids | The EFS Security Group ID  - Required if attach_efs is true | list(string) | [""] | no |
-| efs_id | The EFS ID  - Required if attach_efs is true | String | "" | no |
-| depends_on_efs | If attaching EFS, it makes sure that the mount targets are ready | list(string) | [] | no |
-| ecs_name | Name for the ECS cluster that will be deployed | string | | yes | 
-| ecs_cidr_block | CIDR Block for the Security Group | list(string) | | yes |
-| ecs_min_size | The minimum number of ECS servers to create in the autoscaling group | number | 1 | no |
-| ecs_max_size | The maximuum number of ECS servers to create in the autoscaling group | number | 1 | no |
-| ecs_desired_capacity | The desired number of ECS servers to create in the autoscaling group | number | 1 | no |
-| ecs_instance_type | The instance type to deploy to. | string | t3.medium | no |
-| ecs_key_name | The key name to use for the instances. | string | "" | no |
-| ecs_associate_public_ip_address | Whether to associate a public IP in the launch configuration | bool | false | no | 
-| ecs_additional_iam_statements | Additional IAM statements for the ECS instances | list(object) | [] | no |
-| ecs_capacity_provider_target | Target percentage ECS capacity provider to use | number | "" | no |
-| http_proxy | Name of the HTTP proxy that Docker and ECS agent should use | string | "" | no |
-| http_proxy_port | Port number to use for the HTTP proxy | string | 3128 | no |
-| additional_instance_role_policy | Additional policy that can be added to the ECS instances | string | policy/AmazonSSMManagedInstanceCore | no |
-| monitoring | Enabling detailed monitoring in the launch template | string | true | no |
-| metadata_options_endpoint | Metadata option http endpoint | string | enabled | no |
-| metadata_options_tokens | Metadata option http tokens| string | required | no |
-| metadata_options_hop_limit | Metadata option http hop limit | number | 1 | no |
-| tags | A map of tags to add to all resources | map(string) | {} | no |
+|------|-------------|------|---------|:--------:|
+| additional\_instance\_role\_policy | Additional policy that can be added to the ECS instances. By default we have SSM access enabled | `string` | `"arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"` | no |
+| asg\_protect\_from\_scale\_in | Allows setting instance protection. The Auto Scaling Group will not select instances with this setting for termination during scale in events. | `bool` | `true` | no |
+| asg\_provider\_managed\_termination\_protection | Enables or disables container-aware termination of instances in the auto scaling group when scale-in happens. Valid values are ENABLED and DISABLED. | `string` | `"ENABLED"` | no |
+| attach\_efs | Whether to try and attach an EFS volume to the instances | `bool` | `false` | no |
+| depends\_on\_efs | If attaching EFS, it makes sure that the mount targets are ready | `list(string)` | `[]` | no |
+| ecs\_additional\_iam\_statements | Additional IAM statements for the ECS instances | ```list(object({ effect = string actions = list(string) resources = list(string) }))``` | `[]` | no |
+| ecs\_associate\_public\_ip\_address | Whether to associate a public IP in the launch configuration | `bool` | `false` | no |
+| ecs\_capacity\_provider\_target | Percentage target of capacity to get to before triggering scaling | `number` | `90` | no |
+| ecs\_cidr\_block | ECS CIDR block | `list(string)` | n/a | yes |
+| ecs\_desired\_capacity | Desired number of EC2 instances. | `number` | `1` | no |
+| ecs\_instance\_type | Default instance type | `string` | `"t3.medium"` | no |
+| ecs\_key\_name | SSH key name in your AWS account for AWS instances. | `string` | `""` | no |
+| ecs\_max\_size | Maximum number of EC2 instances. | `number` | `1` | no |
+| ecs\_min\_size | Minimum number of EC2 instances. | `number` | `1` | no |
+| ecs\_name | ECS Cluster Name | `string` | n/a | yes |
+| efs\_id | The EFS ID - Required if attach\_efs is true | `string` | `""` | no |
+| efs\_sg\_ids | The EFS Security Group ID(s) | `list(string)` | ```[ "" ]``` | no |
+| http\_proxy | Name of the HTTP proxy on the network | `string` | `""` | no |
+| http\_proxy\_port | Port number of the HTTP proxy | `number` | `3128` | no |
+| metadata\_options\_endpoint | Metadata option http endpoint | `string` | `"enabled"` | no |
+| metadata\_options\_hop\_limit | Metadata option http hop limit | `number` | `1` | no |
+| metadata\_options\_tokens | Metadata option http tokens | `string` | `"required"` | no |
+| monitoring | Enabling detailed monitoring for launch template instances | `string` | `"true"` | no |
+| subnet\_ids | The Subnet IDs | `list(string)` | n/a | yes |
+| system\_controls | A list of node-level sysctls kernel parameters to set on the container instance | ```list(object({ name = string value = string }))``` | `[]` | no |
+| tags | A map of tags to add to all resources | `map(string)` | `{}` | no |
+| vpc\_id | The VPC ID that the cluster will be deployed to | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| cluster_id | The ECS cluster ID |
-| cluster_arn | The ECS cluster ARN |
-| cluster_asg_name | The ECS cluster Auto Scaling Group name, used to attach Auto Scaling Policies |
-| cluster_asg_arn | The ECS cluster Auto Scaling Group arn, used for ECS capacity providers |
-| cluster_aws_launch_template_name | The ECS cluster AutoScaling Group aws_launch_template Name |
-| cluster_iam_role_arn | The ECS cluster IAM role ARN, useful for attaching to ECR repos |
+| cluster\_arn | Cluster ARN |
+| cluster\_asg\_arn | Cluster AutoScaling Group ARN |
+| cluster\_asg\_name | Cluster AutoScaling Group Name |
+| cluster\_aws\_launch\_template\_name | Cluster AutoScaling Group aws\_template Name |
+| cluster\_iam\_role\_arn | Cluster IAM role ARN |
+| cluster\_id | Cluster ID |
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors
 Module has been forked from a module by [Mark Honomichl](https://github.com/austincloudguru).
