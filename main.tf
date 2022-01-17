@@ -43,6 +43,13 @@ data "template_cloudinit_config" "this" {
 #------------------------------------------------------------------------------
 locals {
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
+  user_data = base64encode(templatefile("${path.module}/user_data.tpl", {
+    ecs_cluster_name = var.ecs_name
+    efs_id           = var.efs_id
+    http_proxy       = var.http_proxy
+    http_proxy_port  = var.http_proxy_port
+    system_controls  = join("\n", data.template_file.sysctl.*.rendered)
+  }))
 }
 
 resource "null_resource" "tags_as_list_of_maps" {
@@ -167,7 +174,7 @@ resource "aws_launch_template" "this" {
   instance_type = var.ecs_instance_type
   key_name      = var.ecs_key_name
 
-  user_data = data.template_cloudinit_config.this.rendered
+  user_data = local.user_data
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address
