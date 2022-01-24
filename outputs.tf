@@ -30,3 +30,8 @@ output "cluster_aws_launch_template_name" {
   description = "Cluster AutoScaling Group aws_template Name"
   value       = aws_launch_template.this.name
 }
+
+output "cluster_security_group_id" {
+  description = "ID from the security group for the ECS cluster"
+  value       = aws_security_group.this.id
+}
