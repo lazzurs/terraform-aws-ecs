@@ -121,6 +121,7 @@ resource "aws_autoscaling_group" "this" {
   min_size                  = var.ecs_min_size
   max_size                  = var.ecs_max_size
   desired_capacity          = var.ecs_desired_capacity
+  wait_for_capacity_timeout = var.ecs_wait_for_capacity_timeout
   health_check_type         = "EC2"
   health_check_grace_period = 300
   vpc_zone_identifier       = var.subnet_ids

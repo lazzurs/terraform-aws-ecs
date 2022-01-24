@@ -165,3 +165,9 @@ variable "asg_provider_managed_termination_protection" {
   type        = string
   default     = "ENABLED"
 }
+
+variable "ecs_wait_for_capacity_timeout" {
+  description = "ASG creation wait timeout"
+  type        = string
+  default     = "20m"
+}
