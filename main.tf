@@ -6,43 +6,19 @@ data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
-data "template_file" "user_data" {
-  template = file("${path.module}/user_data.tpl")
-  vars = {
-    ecs_cluster_name = var.ecs_name
-    efs_id           = var.efs_id
-    http_proxy       = var.http_proxy
-    http_proxy_port  = var.http_proxy_port
-    system_controls  = join("\n", data.template_file.sysctl.*.rendered)
-  }
-}
-
-data "template_file" "sysctl" {
-  count    = length(var.system_controls)
-  template = file("${path.module}/system_controls.tpl")
-  vars = {
-    key   = var.system_controls[count.index].name
-    value = var.system_controls[count.index].value
-  }
-}
-
-data "template_cloudinit_config" "this" {
-  base64_encode = true
-  gzip          = false
-
-  part {
-    filename     = "common.script"
-    content_type = "text/x-shellscript"
-    content      = data.template_file.user_data.rendered
-  }
-}
-
-
 #------------------------------------------------------------------------------
 # Local Values
 #------------------------------------------------------------------------------
 locals {
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
+  user_data = templatefile("${path.module}/user_data.tpl",
+    {
+      ecs_cluster_name = var.ecs_name
+      efs_id           = var.efs_id
+      http_proxy       = var.http_proxy
+      http_proxy_port  = var.http_proxy_port
+    }
+  )
 }
 
 resource "null_resource" "tags_as_list_of_maps" {
@@ -52,13 +28,6 @@ resource "null_resource" "tags_as_list_of_maps" {
     "key"                 = keys(var.tags)[count.index]
     "value"               = values(var.tags)[count.index]
     "propagate_at_launch" = "true"
-  }
-}
-
-#DBG user_data, might be useful to keep representation in state for reference.
-resource "null_resource" "user_data_rendered_view" {
-  triggers = {
-    user_data = data.template_file.user_data.rendered
   }
 }
 
@@ -169,7 +138,7 @@ resource "aws_launch_template" "this" {
   instance_type = var.ecs_instance_type
   key_name      = var.ecs_key_name
 
-  user_data = data.template_cloudinit_config.this.rendered
+  user_data = base64encode(local.user_data)
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address

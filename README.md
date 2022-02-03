@@ -67,16 +67,15 @@ ecs_additional_iam_statements = [
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.0.0 |
+| terraform | ~> 1.0 |
 | aws | >= 2.45 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | 3.69.0 |
+| aws | 3.74.0 |
 | null | 3.1.0 |
-| template | 2.2.0 |
 
 ## Modules
 
@@ -97,13 +96,9 @@ No modules.
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [null_resource.asg-scale-to-0-on-destroy](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.tags_as_list_of_maps](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.user_data_rendered_view](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_ssm_parameter.ecs_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
-| [template_cloudinit_config.this](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/cloudinit_config) | data source |
-| [template_file.sysctl](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
-| [template_file.user_data](https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file) | data source |
 
 ## Inputs
 
@@ -124,6 +119,7 @@ No modules.
 | ecs\_max\_size | Maximum number of EC2 instances. | `number` | `1` | no |
 | ecs\_min\_size | Minimum number of EC2 instances. | `number` | `1` | no |
 | ecs\_name | ECS Cluster Name | `string` | n/a | yes |
+| ecs\_wait\_for\_capacity\_timeout | ASG creation wait timeout | `string` | `"20m"` | no |
 | efs\_id | The EFS ID - Required if attach\_efs is true | `string` | `""` | no |
 | efs\_sg\_ids | The EFS Security Group ID(s) | `list(string)` | ```[ "" ]``` | no |
 | http\_proxy | Name of the HTTP proxy on the network | `string` | `""` | no |
@@ -133,7 +129,6 @@ No modules.
 | metadata\_options\_tokens | Metadata option http tokens | `string` | `"required"` | no |
 | monitoring | Enabling detailed monitoring for launch template instances | `string` | `"true"` | no |
 | subnet\_ids | The Subnet IDs | `list(string)` | n/a | yes |
-| system\_controls | A list of node-level sysctls kernel parameters to set on the container instance | ```list(object({ name = string value = string }))``` | `[]` | no |
 | tags | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | vpc\_id | The VPC ID that the cluster will be deployed to | `string` | n/a | yes |
 
@@ -147,6 +142,7 @@ No modules.
 | cluster\_aws\_launch\_template\_name | Cluster AutoScaling Group aws\_template Name |
 | cluster\_iam\_role\_arn | Cluster IAM role ARN |
 | cluster\_id | Cluster ID |
+| cluster\_security\_group\_id | ID from the security group for the ECS cluster |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors

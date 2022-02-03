@@ -1,1 +1,0 @@
-%{ if key != "" }bash -c 'echo ${key}=${value} >> /etc/sysctl.conf'%{ endif }
