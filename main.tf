@@ -13,10 +13,11 @@ locals {
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
   user_data = templatefile("${path.module}/user_data.tpl",
     {
-      ecs_cluster_name = var.ecs_name
-      efs_id           = var.efs_id
-      http_proxy       = var.http_proxy
-      http_proxy_port  = var.http_proxy_port
+      ecs_cluster_name                      = var.ecs_name
+      efs_id                                = var.efs_id
+      http_proxy                            = var.http_proxy
+      http_proxy_port                       = var.http_proxy_port
+      ecs_engine_task_cleanup_wait_duration = var.ecs_engine_task_cleanup_wait_duration
     }
   )
 }

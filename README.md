@@ -74,7 +74,7 @@ ecs_additional_iam_statements = [
 
 | Name | Version |
 |------|---------|
-| aws | 3.74.0 |
+| aws | 4.3.0 |
 | null | 3.1.0 |
 
 ## Modules
@@ -114,6 +114,7 @@ No modules.
 | ecs\_capacity\_provider\_target | Percentage target of capacity to get to before triggering scaling | `number` | `90` | no |
 | ecs\_cidr\_block | ECS CIDR block | `list(string)` | n/a | yes |
 | ecs\_desired\_capacity | Desired number of EC2 instances. | `number` | `1` | no |
+| ecs\_engine\_task\_cleanup\_wait\_duration | Time to wait from when a task is stopped until the Docker container is removed. As this removes the Docker container data, be aware that if this value is set too low, you may not be able to inspect your stopped containers or view the logs before they are removed. The minimum duration is 1m; any value shorter than 1 minute is ignored. | `string` | `"3h"` | no |
 | ecs\_instance\_type | Default instance type | `string` | `"t3.medium"` | no |
 | ecs\_key\_name | SSH key name in your AWS account for AWS instances. | `string` | `""` | no |
 | ecs\_max\_size | Maximum number of EC2 instances. | `number` | `1` | no |
