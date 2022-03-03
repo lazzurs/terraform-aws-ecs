@@ -162,3 +162,13 @@ variable "ecs_wait_for_capacity_timeout" {
   type        = string
   default     = "20m"
 }
+
+variable "ecs_engine_task_cleanup_wait_duration" {
+  description = <<-EOT
+  Time to wait from when a task is stopped until the Docker container is removed. As this removes the Docker container
+  data, be aware that if this value is set too low, you may not be able to inspect your stopped containers or view the
+  logs before they are removed. The minimum duration is 1m; any value shorter than 1 minute is ignored.
+  EOT
+  type        = string
+  default     = "3h"
+}
