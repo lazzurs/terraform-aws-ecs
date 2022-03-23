@@ -6,8 +6,6 @@ data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
-data "aws_ebs_default_kms_key" "current" {}
-
 #------------------------------------------------------------------------------
 # Local Values
 #------------------------------------------------------------------------------
@@ -151,7 +149,6 @@ resource "aws_launch_template" "this" {
       volume_size = var.ecs_volume_size
       volume_type = var.ecs_volume_type
       encrypted   = true
-      kms_key_id  = data.aws_ebs_default_kms_key.current.id
     }
   }
 
