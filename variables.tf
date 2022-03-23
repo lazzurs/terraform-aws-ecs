@@ -75,6 +75,18 @@ variable "ecs_instance_type" {
   default     = "t3.medium"
 }
 
+variable "ecs_volume_size" {
+  description = "Default instance root volume size"
+  type        = string
+  default     = "30"
+}
+
+variable "ecs_volume_type" {
+  description = "Default instance root volume type"
+  type        = string
+  default     = "gp2"
+}
+
 variable "ecs_key_name" {
   description = "SSH key name in your AWS account for AWS instances."
   type        = string
