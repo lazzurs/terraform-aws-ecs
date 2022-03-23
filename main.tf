@@ -6,6 +6,8 @@ data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
+data "aws_ebs_default_kms_key" "current" {}
+
 #------------------------------------------------------------------------------
 # Local Values
 #------------------------------------------------------------------------------
@@ -138,8 +140,20 @@ resource "aws_launch_template" "this" {
   image_id      = data.aws_ssm_parameter.ecs_ami.value
   instance_type = var.ecs_instance_type
   key_name      = var.ecs_key_name
+  ebs_optimized = true
 
   user_data = base64encode(local.user_data)
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = var.ecs_volume_size
+      volume_type = var.ecs_volume_type
+      encrypted   = true
+      kms_key_id  = data.aws_ebs_default_kms_key.current.id
+    }
+  }
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address

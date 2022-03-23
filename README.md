@@ -96,6 +96,7 @@ No modules.
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [null_resource.asg-scale-to-0-on-destroy](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.tags_as_list_of_maps](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [aws_ebs_default_kms_key.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ebs_default_kms_key) | data source |
 | [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_ssm_parameter.ecs_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
@@ -120,6 +121,8 @@ No modules.
 | ecs\_max\_size | Maximum number of EC2 instances. | `number` | `1` | no |
 | ecs\_min\_size | Minimum number of EC2 instances. | `number` | `1` | no |
 | ecs\_name | ECS Cluster Name | `string` | n/a | yes |
+| ecs\_volume\_size | Default instance root volume size | `string` | `"30"` | no |
+| ecs\_volume\_type | Default instance root volume type | `string` | `"gp2"` | no |
 | ecs\_wait\_for\_capacity\_timeout | ASG creation wait timeout | `string` | `"20m"` | no |
 | efs\_id | The EFS ID - Required if attach\_efs is true | `string` | `""` | no |
 | efs\_sg\_ids | The EFS Security Group ID(s) | `list(string)` | ```[ "" ]``` | no |
