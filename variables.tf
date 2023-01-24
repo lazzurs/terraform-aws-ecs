@@ -101,7 +101,7 @@ variable "ecs_associate_public_ip_address" {
 
 variable "ecs_additional_iam_statements" {
   description = "Additional IAM statements for the ECS instances"
-  type = list(object({
+  type        = list(object({
     effect    = string
     actions   = list(string)
     resources = list(string)
@@ -187,6 +187,9 @@ variable "ecs_engine_task_cleanup_wait_duration" {
 
 variable "instance_types" {
   description = "Instance types to launch, minimum 2 types must be specified. List of Map of 'instance_type'(required) and 'weighted_capacity'(optional)."
-  type        = list(map(any))
-  default     = [{}]
+  type        = list(object({
+    instance_type     = string
+    weighted_capacity = number
+  }))
+  default = [{}]
 }
