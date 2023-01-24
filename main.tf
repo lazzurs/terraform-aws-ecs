@@ -97,22 +97,36 @@ resource "aws_autoscaling_group" "this" {
   vpc_zone_identifier       = var.subnet_ids
   protect_from_scale_in     = var.asg_protect_from_scale_in
 
-  launch_template {
-    id      = aws_launch_template.this.id
-    version = "$Latest"
+  mixed_instances_policy {
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.this.id }
+    }
+    dynamic "override" {
+      for_each = var.instance_types
+      content {
+        instance_type     = lookup(override.value, "instance_type", null)
+        weighted_capacity = lookup(override.value, "weighted_capacity", null)
+      }
+    }
   }
+
+#  launch_template {
+#    id      = aws_launch_template.this.id
+#    version = "$Latest"
+#  }
 
   lifecycle {
     create_before_destroy = true
   }
 
-  tags = concat(
+  tag = concat(
     [
       {
         key                 = "Name"
         value               = var.ecs_name
         propagate_at_launch = true
-      }
+      },
     ],
     local.tags_asg_format,
   )
@@ -136,7 +150,7 @@ resource "aws_ecs_capacity_provider" "this" {
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.ecs_name}-"
   image_id      = data.aws_ssm_parameter.ecs_ami.value
-  instance_type = var.ecs_instance_type
+  instance_type = ""
   key_name      = var.ecs_key_name
   ebs_optimized = true
 

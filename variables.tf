@@ -184,3 +184,9 @@ variable "ecs_engine_task_cleanup_wait_duration" {
   type        = string
   default     = "3h"
 }
+
+variable "instance_types" {
+  description = "Instance types to launch, minimum 2 types must be specified. List of Map of 'instance_type'(required) and 'weighted_capacity'(optional)."
+  type        = list(map(any))
+  default     = [{}]
+}
