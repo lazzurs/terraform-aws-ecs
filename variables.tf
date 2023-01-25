@@ -191,5 +191,5 @@ variable "instance_types" {
     instance_type     = string
     weighted_capacity = number
   }))
-  default = [{}]
+  default = []
 }
