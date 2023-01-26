@@ -1,19 +1,6 @@
 #------------------------------------------------------------------------------
 # Collect necessary data
 #------------------------------------------------------------------------------
-
-locals {
-  # Transform inputs into something easier to use
-  instance_types  = var.ecs_instance_type ? [var.ecs_instance_type] : var.instance_types
-  # Check if we are in single instance mode
-  instance_type_count = lenght(var.instance_types)
-  single_instance = local.instance_type_count == 1
-  # Use local.asg.<subkeys> in outputs / other resources
-  asg             = single_instance ? aws_autoscaling_group.single : aws_autoscaling_group.mixed
-  asg_name        = single_instance ? aws_autoscaling_group.single.name : aws_autoscaling_group.mixed.name
-  asg_arn         = single_instance ? aws_autoscaling_group.single.arn : aws_autoscaling_group.mixed.arn
-}
-
 data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
@@ -22,6 +9,13 @@ data "aws_ssm_parameter" "ecs_ami" {
 # Local Values
 #------------------------------------------------------------------------------
 locals {
+  # Transform inputs into something easier to use
+  instance_types  = var.ecs_instance_type ? [var.ecs_instance_type] : var.instance_types
+  # Check if we are in single instance mode
+  instance_type_count = length(var.instance_types)
+  single_instance = local.instance_type_count == 1
+  # Use local.asg.<subkeys> in outputs / other resources
+  asg             = single_instance ? aws_autoscaling_group.single : aws_autoscaling_group.mixed
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
   user_data       = templatefile("${path.module}/user_data.tpl",
     {
@@ -89,7 +83,7 @@ resource "null_resource" "asg-scale-to-0-on-destroy" {
   triggers = {
     cluster_arn            = aws_ecs_cluster.this.arn
     capacity_providers_arn = join(",", aws_ecs_cluster.this.capacity_providers)
-    asg_name               = local.asg
+    asg_name               = local.asg.name
   }
   provisioner "local-exec" {
     when    = destroy
@@ -123,7 +117,7 @@ resource "aws_autoscaling_group" "single" {
     create_before_destroy = true
   }
 
-  tag = concat(
+  tags = concat(
     [
       {
         key                 = "Name"
@@ -172,7 +166,7 @@ resource "aws_autoscaling_group" "mixed" {
     create_before_destroy = true
   }
 
-  tag = concat(
+  tags = concat(
     [
       {
         key                 = "Name"
@@ -188,7 +182,7 @@ resource "aws_ecs_capacity_provider" "this" {
   name = "${var.ecs_name}-capacity"
 
   auto_scaling_group_provider {
-    auto_scaling_group_arn         = local.asg_arn
+    auto_scaling_group_arn         = local.asg.arn
     managed_termination_protection = var.asg_provider_managed_termination_protection
 
     managed_scaling {
