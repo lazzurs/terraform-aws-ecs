@@ -104,10 +104,6 @@ resource "aws_autoscaling_group" "single" {
   vpc_zone_identifier       = var.subnet_ids
   protect_from_scale_in     = var.asg_protect_from_scale_in
 
-  # here should be the condition based on
-  # ecs_instance_type != ""
-  # length(instance_types) < 2
-  # define a local for the correct autoscalling resource
   launch_template {
     id      = aws_launch_template.this.id
     version = "$Latest"
@@ -146,6 +142,7 @@ resource "aws_autoscaling_group" "mixed" {
     launch_template {
       launch_template_specification {
         launch_template_id = aws_launch_template.this.id
+        version = "$Latest"
       }
     }
     dynamic "override" {
@@ -156,11 +153,6 @@ resource "aws_autoscaling_group" "mixed" {
       }
     }
   }
-
-  #  launch_template {
-  #    id      = aws_launch_template.this.id
-  #    version = "$Latest"
-  #  }
 
   lifecycle {
     create_before_destroy = true
