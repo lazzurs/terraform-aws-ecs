@@ -10,14 +10,17 @@ data "aws_ssm_parameter" "ecs_ami" {
 #------------------------------------------------------------------------------
 locals {
   # Transform inputs into something easier to use
-  instance_types  = var.ecs_instance_type ? [var.ecs_instance_type] : var.instance_types
-  # Check if we are in single instance mode
   instance_type_count = length(var.instance_types)
+
+  mixed_instance_type = local.instance_type_count > 1
+  # Check if we are in single instance mode
+
   single_instance = local.instance_type_count == 1
   # Use local.asg.<subkeys> in outputs / other resources
-  asg             = single_instance ? aws_autoscaling_group.single : aws_autoscaling_group.mixed
+
+  asg             = local.single_instance ? aws_autoscaling_group.single[0] : aws_autoscaling_group.mixed[0]
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
-  user_data       = templatefile("${path.module}/user_data.tpl",
+  user_data = templatefile("${path.module}/user_data.tpl",
     {
       ecs_cluster_name                      = var.ecs_name
       efs_id                                = var.efs_id
@@ -66,9 +69,9 @@ resource "aws_security_group" "this" {
 }
 
 resource "aws_ecs_cluster" "this" {
-  name                               = var.ecs_name
-  aws_ecs_cluster_capacity_providers = [aws_ecs_capacity_provider.this.name]
-  tags                               = merge(
+  name               = var.ecs_name
+  capacity_providers = [aws_ecs_capacity_provider.this.name]
+  tags = merge(
     {
       "Name" = var.ecs_name
     },
@@ -93,7 +96,7 @@ resource "null_resource" "asg-scale-to-0-on-destroy" {
 }
 
 resource "aws_autoscaling_group" "single" {
-  count                     = local.single_instance ? 1 : 0
+  count                     = local.mixed_instance_type ? 0 : 1
   name                      = var.ecs_name
   min_size                  = var.ecs_min_size
   max_size                  = var.ecs_max_size
@@ -127,7 +130,7 @@ resource "aws_autoscaling_group" "single" {
 
 
 resource "aws_autoscaling_group" "mixed" {
-  count                     = local.single_instance ? 0 : local.instance_type_count
+  count                     = local.mixed_instance_type ? local.instance_type_count : 0
   name                      = var.ecs_name
   min_size                  = var.ecs_min_size
   max_size                  = var.ecs_max_size
@@ -142,14 +145,14 @@ resource "aws_autoscaling_group" "mixed" {
     launch_template {
       launch_template_specification {
         launch_template_id = aws_launch_template.this.id
-        version = "$Latest"
+        version            = "$Latest"
       }
-    }
-    dynamic "override" {
-      for_each = var.instance_types
-      content {
-        instance_type     = lookup(override.value, "instance_type", null)
-        weighted_capacity = lookup(override.value, "weighted_capacity", null)
+      dynamic "override" {
+        for_each = var.instance_types
+        content {
+          instance_type     = lookup(override.value, "instance_type", null)
+          weighted_capacity = lookup(override.value, "weighted_capacity", null)
+        }
       }
     }
   }
