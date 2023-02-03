@@ -9,15 +9,11 @@ data "aws_ssm_parameter" "ecs_ami" {
 # Local Values
 #------------------------------------------------------------------------------
 locals {
-  # Transform inputs into something easier to use
-  instance_type_count = length(var.instance_types)
-
+  ecs_cluster_type = compact(concat([var.ecs_instance_type], var.ecs_mixed_instance_types))
+  instance_type_count = length(local.ecs_cluster_type)
   mixed_instance_type = local.instance_type_count > 1
   # Check if we are in single instance mode
-
   single_instance = local.instance_type_count == 1
-  # Use local.asg.<subkeys> in outputs / other resources
-
   asg             = local.single_instance ? aws_autoscaling_group.single[0] : aws_autoscaling_group.mixed[0]
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
   user_data = templatefile("${path.module}/user_data.tpl",
@@ -148,7 +144,7 @@ resource "aws_autoscaling_group" "mixed" {
         version            = "$Latest"
       }
       dynamic "override" {
-        for_each = var.instance_types
+        for_each = var.ecs_mixed_instance_types
         content {
           instance_type     = lookup(override.value, "instance_type", null)
           weighted_capacity = lookup(override.value, "weighted_capacity", null)
@@ -191,7 +187,7 @@ resource "aws_ecs_capacity_provider" "this" {
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.ecs_name}-"
   image_id      = data.aws_ssm_parameter.ecs_ami.value
-  instance_type = ""
+  instance_type = local.single_instance ? var.ecs_instance_type : ""
   key_name      = var.ecs_key_name
   ebs_optimized = true
 
