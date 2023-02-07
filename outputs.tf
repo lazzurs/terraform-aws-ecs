@@ -8,17 +8,17 @@ output "cluster_id" {
 
 output "cluster_arn" {
   description = "Cluster ARN"
-  value       = aws_ecs_cluster.this.arn
+  value       = local.asg.arn
 }
 
 output "cluster_asg_name" {
   description = "Cluster AutoScaling Group Name"
-  value       = aws_autoscaling_group.this.name
+  value       = local.asg.name
 }
 
 output "cluster_asg_arn" {
   description = "Cluster AutoScaling Group ARN"
-  value       = aws_autoscaling_group.this.arn
+  value       = local.asg.arn
 }
 
 output "cluster_iam_role_arn" {

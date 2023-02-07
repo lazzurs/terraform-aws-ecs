@@ -1,7 +1,6 @@
 #------------------------------------------------------------------------------
 # Collect necessary data
 #------------------------------------------------------------------------------
-
 data "aws_ssm_parameter" "ecs_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
@@ -10,6 +9,12 @@ data "aws_ssm_parameter" "ecs_ami" {
 # Local Values
 #------------------------------------------------------------------------------
 locals {
+  ecs_cluster_type = compact(concat([var.ecs_instance_type], var.ecs_mixed_instance_types))
+  instance_type_count = length(local.ecs_cluster_type)
+  mixed_instance_type = local.instance_type_count > 1
+  # Check if we are in single instance mode
+  single_instance = local.instance_type_count == 1
+  asg             = local.single_instance ? aws_autoscaling_group.single[0] : aws_autoscaling_group.mixed[0]
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
   user_data = templatefile("${path.module}/user_data.tpl",
     {
@@ -77,7 +82,7 @@ resource "null_resource" "asg-scale-to-0-on-destroy" {
   triggers = {
     cluster_arn            = aws_ecs_cluster.this.arn
     capacity_providers_arn = join(",", aws_ecs_cluster.this.capacity_providers)
-    asg_name               = aws_autoscaling_group.this.name
+    asg_name               = local.asg.name
   }
   provisioner "local-exec" {
     when    = destroy
@@ -86,7 +91,8 @@ resource "null_resource" "asg-scale-to-0-on-destroy" {
   depends_on = [aws_ecs_cluster.this]
 }
 
-resource "aws_autoscaling_group" "this" {
+resource "aws_autoscaling_group" "single" {
+  count                     = local.mixed_instance_type ? 0 : 1
   name                      = var.ecs_name
   min_size                  = var.ecs_min_size
   max_size                  = var.ecs_max_size
@@ -112,7 +118,52 @@ resource "aws_autoscaling_group" "this" {
         key                 = "Name"
         value               = var.ecs_name
         propagate_at_launch = true
+      },
+    ],
+    local.tags_asg_format,
+  )
+}
+
+
+resource "aws_autoscaling_group" "mixed" {
+  count                     = local.mixed_instance_type ? local.instance_type_count : 0
+  name                      = var.ecs_name
+  min_size                  = var.ecs_min_size
+  max_size                  = var.ecs_max_size
+  desired_capacity          = var.ecs_desired_capacity
+  wait_for_capacity_timeout = var.ecs_wait_for_capacity_timeout
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
+  vpc_zone_identifier       = var.subnet_ids
+  protect_from_scale_in     = var.asg_protect_from_scale_in
+
+  mixed_instances_policy {
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.this.id
+        version            = "$Latest"
       }
+      dynamic "override" {
+        for_each = var.ecs_mixed_instance_types
+        content {
+          instance_type     = lookup(override.value, "instance_type", null)
+          weighted_capacity = lookup(override.value, "weighted_capacity", null)
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = concat(
+    [
+      {
+        key                 = "Name"
+        value               = var.ecs_name
+        propagate_at_launch = true
+      },
     ],
     local.tags_asg_format,
   )
@@ -122,7 +173,7 @@ resource "aws_ecs_capacity_provider" "this" {
   name = "${var.ecs_name}-capacity"
 
   auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.this.arn
+    auto_scaling_group_arn         = local.asg.arn
     managed_termination_protection = var.asg_provider_managed_termination_protection
 
     managed_scaling {
@@ -130,13 +181,13 @@ resource "aws_ecs_capacity_provider" "this" {
       target_capacity = var.ecs_capacity_provider_target
     }
   }
-  depends_on = [aws_autoscaling_group.this]
+  depends_on = [local.asg]
 }
 
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.ecs_name}-"
   image_id      = data.aws_ssm_parameter.ecs_ami.value
-  instance_type = var.ecs_instance_type
+  instance_type = local.single_instance ? var.ecs_instance_type : ""
   key_name      = var.ecs_key_name
   ebs_optimized = true
 
@@ -154,9 +205,11 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = var.ecs_associate_public_ip_address
-    security_groups = (length(var.efs_sg_ids) > 0 ? concat([
-      aws_security_group.this.id], var.efs_sg_ids) : [
-    aws_security_group.this.id])
+    security_groups             = (length(var.efs_sg_ids) > 0 ? concat([
+      aws_security_group.this.id
+    ], var.efs_sg_ids) : [
+      aws_security_group.this.id
+    ])
   }
 
   iam_instance_profile {
@@ -197,7 +250,7 @@ resource "aws_iam_role" "this" {
   name               = var.ecs_name
   path               = "/"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags = merge(
+  tags               = merge(
     {
       "Name" = var.ecs_name
     },
@@ -219,7 +272,7 @@ resource "aws_iam_role_policy_attachment" "additional_instance_role_policy" {
 
 data "aws_iam_policy_document" "policy" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = [
       "ecs:CreateCluster",
       "ecs:DeregisterContainerInstance",
@@ -261,7 +314,7 @@ data "aws_iam_policy_document" "assume_role" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = [
         "ecs.amazonaws.com",
         "ec2.amazonaws.com"
